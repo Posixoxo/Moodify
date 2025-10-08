@@ -65,7 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
     { name: "Daft Punk", image: "Images/Daft Punk.jpg" },
     { name: "Dua Lipa", image: "Images/Dua Lipa.jpg" },
     { name: "Eminem", image: "Images/Eminem.jpg" },
-    { name: "Hillsong United", image: "Images/Hillsong United.jpg" },
     { name: "Imagine Dragons", image: "Images/Imagine Dragons.jpg" },
     { name: "JBalvin", image: "Images/JBalvin.jpg" },
     { name: "John Legend", image: "Images/John Legend.jpg" },
