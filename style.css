@@ -1,0 +1,964 @@
+body{
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(86deg,#004643 0%, rgba(43, 43, 43, 1) 4%);
+}
+
+/* ....index.html....*/
+
+main {
+    flex: 1;
+  }
+
+/* --- Utility Container Positioning --- */
+.utility-container {
+    position: absolute;
+    top: 30px;
+    right: 70px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    z-index: 99; 
+}
+
+/* --- CSS for the Mobile Navigation Container --- */
+#mobile-nav-container {
+    z-index: 1000; 
+}
+
+/* --- Dark Mode Toggle Style (for the sun/moon icon) --- */
+#dark-mode-toggle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background-color: rgba(43, 43, 43, 1);
+    color: #2b2b2b; /* Dark text/icon */
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+/* --- Dark Mode CSS Variables --- */
+:root {
+    /* Your existing variables for primary colors */
+    --bg-main: linear-gradient(86deg,#004643 0%, rgba(43, 43, 43, 1) 4%);
+    --text-color: white;
+    --button-primary: #004643;
+}
+
+body.light-mode {
+    --bg-main: linear-gradient(86deg, #FFD700 0%, #FFFFFF 20%); /* Lighter, less saturated colors */
+    --text-color: #2b2b2b;
+    --button-primary: #00796B; /* A secondary, fresh color for light mode */
+}
+
+/* Apply variables to elements */
+body {
+    background: var(--bg-main);
+    color: var(--text-color);
+}
+.mood-grid button {
+    background-color: var(--button-primary);
+    color: var(--text-color);
+}
+/* You would need to update all elements using a fixed color to use a CSS Variable */
+
+body, .playlist-form, .playlist-card {
+    transition: background 0.5s ease, color 0.5s ease;
+}
+
+
+.nbar {
+    color: #b8b7b4;
+    border-color: #004643;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 10px;
+    padding: 10px 0; /* Added padding for better visibility */
+}
+
+.nbar h1{
+    font-family: "Caprasimo", serif;
+    font-size: 1.8rem;
+    letter-spacing: 2px; 
+    background: linear-gradient(90deg, #FFD700 0%, #004643 50%, #FFD700 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+.nbar h1:hover {
+    cursor: pointer; /* Makes it clear it's clickable */
+    transform: scale(1.02); /* Slight scale-up */
+    transition: transform 0.3s ease-in-out;
+}
+
+.logo-t{
+    text-decoration: none;
+}
+
+#mobile-nav-container {
+    /* Initially hide the entire menu */
+    position: fixed; /* Keep it fixed over content */
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100vh; /* Full viewport height */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+
+    /* Default HIDDEN state */
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none; /* Crucial: ensures the hidden menu doesn't block clicks */
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 100; /* Ensure it's on top of other content */
+}
+
+
+#mobile-nav {
+    /* Position the menu panel to the right side */
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 70%; /* Adjust width as needed */
+    height: 100%;
+    background-color: rgba(43, 43, 43, 1); /* Dark menu background */
+    padding: 20px;
+
+    /* Menu links and close button inside the menu */
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+
+    /* Initially push it off-screen to the right for a slide effect */
+    transform: translateX(100%); 
+    transition: transform 0.3s ease;
+}
+
+#mobile-nav a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-family: "Caprasimo", serif;
+}
+
+#menu-close-btn {
+    align-self: flex-end; /* Pushes the close icon to the right corner */
+    cursor: pointer;
+    margin-bottom: 30px;
+}
+
+
+#mobile-nav-container.open {
+    /* Visible state for the container */
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+#mobile-nav-container.open #mobile-nav {
+    transform: translateX(0);
+}
+
+
+.playlist-btn {
+    background: linear-gradient(135deg, #004643 0%, #d1ac00 250%);
+    color: #fff;
+    border: none;
+    padding: 14px 28px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .playlist-btn:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 10px 16px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(135deg, #004643 0%, #d1ac00 250%);
+  }
+  
+  .social-icons{
+    display: flex; 
+    flex-direction: row; 
+    gap: 60px; 
+    margin: 20px 10px;
+  }
+
+  /* Set up the base animation */
+@keyframes color-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Style for Happy Mood  browse.html */
+body.mood-happy {
+    background: linear-gradient(90deg, #FFD700, #FF8C00, #FFD700);
+    background-size: 400% 400%;
+    animation: color-shift 15s ease infinite;
+}
+body.mood-chill {
+    background: linear-gradient(90deg, #4568DC, #B0E0E6, #4568DC);
+    background-size: 400% 400%;
+    animation: color-shift 20s ease infinite reverse;
+}
+body.mood-workout {
+    background: linear-gradient(90deg, #f12711, #f5af19);
+    background-size: 400% 400%;
+    animation: color-shift 10s ease infinite;
+}
+body.mood-heartbreak {
+    background: linear-gradient(90deg, #ff6a88, #d66d75);
+    background-size: 400% 400%;
+    animation: color-shift 18s ease infinite;
+}
+
+/* ADDED: Visualizer styles */
+#visualizer {
+    display:flex;
+    gap:6px;
+    align-items:flex-end;
+    height:40px;
+    margin: 18px auto;
+    justify-content:center;
+}
+#visualizer span {
+    display:block;
+    width:8px;
+    background:#fff;
+    height:12px;
+    border-radius:3px;
+    animation: pulse 1s infinite ease-in-out;
+}
+#visualizer span:nth-child(2){ animation-delay:0.15s }
+#visualizer span:nth-child(3){ animation-delay:0.3s }
+#visualizer span:nth-child(4){ animation-delay:0.45s }
+#visualizer span:nth-child(5){ animation-delay:0.6s }
+
+@keyframes pulse {
+    0%,100% { height:12px; opacity:0.85; }
+    50% { height:40px; opacity:1; }
+}
+
+/* subtle pulse/glow for mood transitions (Browse page only) */
+.mood-pulse {
+  transition: box-shadow 0.45s ease, filter 0.45s ease;
+  box-shadow: inset 0 0 80px rgba(255,255,255,0.03), 0 8px 40px rgba(0,0,0,0.25);
+  filter: saturate(1.06) brightness(1.03);
+}
+
+/* optionally animate the visualizer's span bars when its 'active' */
+#visualizer.active span {
+  transform-origin: bottom center;
+  animation: visualizer-pop 0.7s ease-in-out infinite alternate;
+}
+@keyframes visualizer-pop {
+  from { transform: scaleY(1); opacity: 0.9; }
+  to   { transform: scaleY(2.2); opacity: 1; }
+}
+
+
+/* Visualizer color changes per mood (ADDED) */
+body.mood-chill #visualizer span { background: #00f2fe; }
+body.mood-happy #visualizer span { background: #FFD700; }
+body.mood-workout #visualizer span { background: #f12711; }
+body.mood-heartbreak #visualizer span { background: #ff6a88; }
+
+/* ADDED: Playlist app styles (cards, controls) */
+.playlist-controls { max-width: 1000px; margin: 20px auto; padding: 0 18px; text-align: center; }
+.playlist-controls h2{
+    margin-top: 50px; 
+    font-family: "Caprasimo", serif;
+    letter-spacing: 2px;}
+.mood-grid { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin: 12px 0; }
+.mood-grid .mood-btn {
+    padding:10px 14px;
+    border-radius:24px;
+    border:none;
+    background:#004643;
+    color:white;
+    font-weight:600;
+    cursor:pointer;
+}
+.extra-controls { margin: 12px 0; }
+#randomVibeBtn { padding:8px 12px; background:#2b2b2b; color:#fff; border-radius:8px; border:none; cursor:pointer; font-family: "Caprasimo", serif;}
+
+.vibe-builder { display:flex; gap:10px; justify-content:center; align-items:center; margin-top: 12px; flex-wrap:wrap; }
+.vibe-builder select { padding:8px; border-radius:8px; background:var(--bg-input,#1E1E1E); color:var(--text-color,#fff); border:1px solid rgba(255,255,255,0.06); }
+.vibe-builder button{font-family: "Caprasimo", serif; border-radius: 10px; cursor: pointer;}
+.vibe-builder label{font-family: "Caprasimo", serif;}
+
+/* Playlist cards */
+.playlist-container { display:grid; grid-template-columns: repeat(auto-fill,minmax(240px,1fr)); gap:18px; padding: 18px; max-width:1200px; margin: 16px auto;}
+.playlist-card { background: rgba(0,0,0,0.35); border-radius:12px; padding:12px; color: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.4); }
+.playlist-card img { width:100%; border-radius:8px; object-fit:cover; height:140px; }
+.playlist-card h3 { margin:10px 0 6px; font-size:1.05rem; }
+.playlist-card p { margin:0; color: #ddd; font-size:0.95rem; }
+.platform-links { margin-top:10px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+.platform-links a { padding:8px 10px; border-radius:8px; background:rgba(255,255,255,0.06); color:#fff; text-decoration:none; font-weight:600; }
+
+/* Keep your existing footer styles (kept but cleaned) */
+hr{ border: none; border-top: 1px solid #004643; margin: 40px 0; }
+footer{ text-align:center; margin-top:20px; margin-bottom:20px; color:#b8b7b4; font-size:17px; font-family:"Caprasimo", serif; letter-spacing:2px; background: linear-gradient(90deg, #FFD700 0%, #004643 50%, #FFD700 100%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+
+
+/*...index.html style continuation...*/
+.idiv-1 {
+    margin-top: 70px;
+    position: relative;
+    width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+.search-arrow-btn {
+    position: absolute;
+    top: 50%; 
+    right: 5px;
+    transform: translateY(-50%); 
+    border: 1px solid transparent;
+    border-radius: 30px;
+
+    /* 🎨 Color and Style (Easy to change!) 🎨 */
+    background: #004643; 
+    cursor: pointer;
+    font-size: 1.2em;
+    font-weight: bold;
+    padding: 5px;
+
+    /* Set the initial color */
+    color: rgba(43, 43, 43, 1) /* Example: Blue */
+}
+
+.search-arrow-btn:hover {
+    /* Change color on hover */
+    color: white; /* Example: Darker Blue */
+}
+
+.input-1{
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    padding: 10px 40px 10px 10px; 
+    border-radius: 30px;
+    max-width: 100%;
+    width: 100%;
+    height: 40px;
+    box-sizing: border-box;
+    font-family: serif;
+}
+
+.mood-grid{
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    margin: 90px 30px 0 30px;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+}
+
+.mood-grid button{
+    border: 1px solid transparent;
+    font-size: 17px;
+    border-radius: 30px;
+    max-width: 100%;
+    width: 300px;
+    height: 60px;
+    font-family: serif;
+    cursor: pointer;
+    background-color: #004643;
+    color: white;
+    border-top: 1px solid #d1ac00;
+    border-bottom: 1px solid #d1ac00;
+    
+}
+
+.artist-section {
+    /* Center the entire section on the page */
+    display: flex;
+    justify-content: center;
+    margin-top: 100px; /* Reduced margin for better flow */
+    padding: 0 20px;
+}
+
+.artist-grid-container {
+    /* Flexbox for a responsive grid */
+    display: flex;
+    flex-wrap: wrap; /* Allows buttons to wrap to the next line */
+    justify-content: center; /* Center buttons within the grid */
+    gap: 15px; /* Consistent spacing between buttons */
+    max-width: 700px; /* Limits the overall size on large screens */
+    width: 100%;
+}
+
+.artist-button {
+    /* **KEY RESPONSIVE CHANGE:** Used a fixed width on mobile, and let flex-basis handle the sizing 
+    to fit two or three columns. */
+    flex: 1 1 45%; /* Shorthand for flex-grow, flex-shrink, flex-basis */
+    max-width: 150px; /* Limits size on large screens */
+    height: 80px; /* Fixed height for visual consistency */
+    
+    border-radius: 10px;
+    border: 1px solid var(--button-primary); /* Use a subtle color border */
+    background-color: var(--bg-surface, white); /* Use CSS variable for light/dark mode */
+    color: var(--button-primary); 
+    
+    /* Set a smooth transition on the transform property */
+    transition: transform 0.3s ease-in-out;
+    /* Ensure the button content stays centered and readable */
+    position: relative; 
+    z-index: 1; /* Default stacking order */
+}
+
+.artist-button:hover {
+    /* Scale up the button to make it "pop" (1.05 = 5% larger) */
+    transform: scale(1.05); 
+    /* Bring it slightly forward so it overlaps neighbors */
+    z-index: 10; 
+}
+
+/* Ensure the content inside the button is centered */
+.butt-img {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.img-1 {
+    width: 45px; /* Slightly smaller avatar */
+    height: 60px;
+    border-radius: 20%;
+    object-fit: cover;
+}
+
+.butt-img p{
+    margin: 0;
+    font-family: "Caprasimo", serif;
+    color: black;
+}
+
+
+/* --- VARIABLES FOR EASY TUNING --- */
+:root {
+    /* 1. REDUCED THICKNESS: Change this value to adjust the width of the color line */
+    --border-thickness: 1.5px; 
+    --button-radius: 30px;
+    --animation-speed: 4s;
+    /* This will be the solid background color (the gold part of your gradient) */
+    --button-bg-color: #004643; 
+}
+
+/* ======================================= */
+/* 2. THE ROTATING COLOR LAYER (::before) */
+/* New colors to match your dark/gold theme */
+/* ======================================= */
+
+.color-border-button::before {
+    content: "";
+    position: absolute;
+    top: -100%; 
+    left: -100%;
+    right: -100%;
+    bottom: -100%;
+    
+    /* 💥 UPDATED CONIC GRADIENT 💥 */
+    background: conic-gradient(
+        from 0deg,
+        #FFD700,    /* Bright Gold/Yellow */
+        #FF8C00,    /* Dark Orange */
+        #B8860B,    /* Dark Goldenrod (Gold tint of background) */
+        #D2B48C,    /* Tan/Light Gold */
+        #FFFFFF,    /* White/Bright Highlight */
+        #FFD700     /* Bright Gold (completes the loop) */
+    );
+    
+    border-radius: calc(var(--button-radius) + var(--border-thickness));
+    animation: gradient-rotate var(--animation-speed) linear infinite;
+    z-index: -2; 
+}
+
+/* ======================================= */
+/* 3. THE SOLID MASK LAYER (::after) */
+/* This uses your primary gold color for the button fill */
+/* ======================================= */
+
+.color-border-button::after {
+    content: "";
+    position: absolute;
+    
+    /* Inset defined by the border thickness variable */
+    top: var(--border-thickness); 
+    left: var(--border-thickness);
+    right: var(--border-thickness);
+    bottom: var(--border-thickness);
+    
+    background-color: var(--button-bg-color); /* Uses #004643 */
+    border-radius: var(--button-radius);
+    z-index: -1;
+}
+
+/* ======================================= */
+/* Remaining CSS (No changes needed for effect) */
+/* ======================================= */
+
+.butt-3 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px;
+    width: 100%;
+}
+
+.color-border-button {
+    position: relative;
+    width: 90vw;
+    max-width: 300px;
+    min-height: 110px;
+    cursor: pointer;
+    font-family: "Caprasimo", serif;
+    background: transparent;
+    border: none; 
+    border-radius: var(--button-radius);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10; 
+    overflow: hidden; 
+}
+
+.button-content-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    color: white; 
+    z-index: 5; 
+    position: relative; 
+}
+
+.play-link {
+    text-decoration: none;
+    display: inline-block;
+}
+
+.play-b {
+    display: block;
+    width: 60px;
+    height: auto;
+    animation: float 3s ease-in-out infinite alternate;
+}
+
+@keyframes gradient-rotate {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+@keyframes float {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-8px); }
+}
+
+hr{
+    border: none;
+    border-top: 1px solid #004643;
+    margin: 40px 0;
+}
+
+footer{
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    color: #b8b7b4;
+    font-size: 17px;
+    font-family: serif;
+    letter-spacing: 2px; 
+    background: linear-gradient(90deg, #FFD700 0%, #004643 50%, #FFD700 100%);        
+    -webkit-background-clip: text;
+    background-clip: text;   
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+
+/* Playlist Form Styling */
+/* Container */
+
+/* --- Dark Mode/Light Mode Variables (in your CSS) --- */
+:root {
+    /* Dark Mode Defaults */
+    --bg-main: linear-gradient(86deg, #004643 0%, rgba(43, 43, 43, 1) 4%);
+    --bg-surface: #2B2B2B; /* For cards/forms */
+    --bg-input: #1E1E1E; /* For inputs */
+    --text-color: white;
+    --text-accent: #f5f5f5;
+    --button-primary: #004643;
+}
+
+body.light-mode {
+    /* Light Mode Settings */
+    --bg-main: linear-gradient(86deg, #FFFFFF 0%, #FFFFFF 20%);
+    --bg-surface: #FFFFFF;
+    --bg-input: #f0f0f0;
+    --text-color: #2b2b2b;
+    --text-accent: #444;
+    --button-primary: #00796B; /* Teal */
+}
+
+.playlist-form {
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 30px;
+    background: var(--bg-surface);
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    color: var(--text-color); 
+  }
+  
+  /* Heading */
+  .playlist-form h2 {
+    text-align: center;
+    margin-bottom: 40px;
+    color: var(--button-primary);  /* your warm gold */
+    font-size: 20px;
+    font-family: "Caprasimo", serif;
+  }
+  
+  /* Labels */
+  .playlist-form label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 300;
+    color: var(--text-accent);
+    font-family: "Caprasimo", serif;
+  }
+  
+  /* Inputs & Textarea */
+  .playlist-form input,
+  .playlist-form select,
+  .playlist-form textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid;
+    border-color: var(--text-accent);
+    border-radius: 8px;
+    background: var(--bg-input);
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .playlist-form input:focus,
+  .playlist-form select:focus,
+  .playlist-form textarea:focus {
+    outline: none;
+    border-color: #004643;
+    box-shadow: 0 0 0 3px rgba(156, 91, 0, 0.3);
+  }
+  
+  /* Button */
+  .playlist-form button {
+    display: inline-block;
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #d1ac00 0%, #00796B 100%);
+    color: #b8b7b4;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    font-family: "Caprasimo", serif;
+  }
+  
+  .playlist-form button:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #00796B 0%, #d1ac00 100%);
+    box-shadow: 0 8px 14px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Placeholder text */
+  .playlist-form input::placeholder,
+  .playlist-form textarea::placeholder {
+    color: #aaa;
+    font-size: 0.95rem;
+    font-family: "Caprasimo", serif;
+  }
+
+  /* Browse.html other moods section */
+.top-image{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 10px;
+    padding: 10px 0;
+}
+
+.APP-1{
+    max-width: 100%;
+    display: block;
+    width: 60px;
+    height: auto;
+}
+
+.top-image:last-of-type {
+    margin-top: 150px;  /* adjust until it clears the container */
+    margin-bottom: 20px; /* keep some space above footer */
+  }
+  
+  .top-image:last-of-type .APP-1 {
+    width: clamp(40px, 6vw, 80px); /* still responsive */
+    height: auto;
+  }
+
+  /*.... PickAPlatform.html ....*/
+
+.container{
+    border: 1px solid transparent;
+    margin: 40px auto 80px auto;
+    max-width: 900px;
+}
+
+.container h2{
+    text-align: center;
+    color: #b8b7b4;
+    font-size: 18px;
+    font-family: serif;
+    letter-spacing: 2px; 
+    background: linear-gradient(90deg, #FFD700 0%, #004643 50%, #FFD700 100%);        
+    -webkit-background-clip: text;
+    background-clip: text;   
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+.logos-link{
+    display: flex;
+    flex-wrap: wrap; 
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 70px;
+    margin: 100px auto 80px auto;
+    max-width: 600px;
+}
+
+.logo{
+    max-width: 100%;
+    display: block;
+    width: 90px;
+    height: auto;
+}
+
+.logos-link a {
+    /* Allow link to shrink/grow and set a basis width */
+    flex: 0 1 90px; 
+    /* This ensures they don't grow past the logo's width, which is 90px */
+    width: 90px;
+}
+
+/* browse.html playlist styles*/
+.loading {
+    color: #888;
+    font-style: italic;
+  }
+  
+  .error {
+    color: red;
+  }
+  
+  .track-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: #1e1e1e;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    transition: transform 0.2s ease;
+  }
+  
+  .track-card:hover {
+    transform: scale(1.03);
+  }
+
+  .track-info h3 {
+    margin: 0;
+    color: #fff;
+  }
+  
+  .track-info p {
+    margin: 4px 0;
+    color: #ccc;
+  }
+  
+  .play-btn {
+    color: #1DB954;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  .play-btn:hover {
+    text-decoration: underline;
+  }
+
+  /* index.html search results styles */
+
+  .search-results {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 30px auto;
+    max-width: 600px; /* controls width */
+    text-align: center;
+  }
+  
+  .track {
+    background: #1e1e1e; /* dark background for contrast */
+    color: white;
+    border-radius: 12px;
+    padding: 15px;
+    margin: 12px 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .track:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+  }
+  
+  .track img {
+    width: 70px;
+    height: 70px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+  
+  .track h3 {
+    font-size: 1.1rem;
+    margin: 0;
+  }
+  
+  .track p {
+    font-size: 0.9rem;
+    color: #bdbdbd;
+    margin: 4px 0;
+  }
+  
+  .track a {
+    font-size: 0.85rem;
+    color: #1DB954; /* Spotify green */
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  
+  .track a:hover {
+    color: #1ed760;
+  }
+
+  /* PickAPlatform iframe style */
+  .player-container {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+    text-align: center;
+  }
+  
+  .player-container iframe {
+    max-width: 450px;
+    width: 100%;
+    height: 450px;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* 🔮 Coming Soon Card Styles */
+  .coming-soon-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 40px 20px;
+    max-width: 400px;
+    width: 100%;
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease;
+  }
+  
+  .coming-soon-card:hover {
+    transform: scale(1.03);
+  }
+  
+  .coming-soon-logo {
+    width: 80px;
+    margin-bottom: 15px;
+    opacity: 0.9;
+  }
+  
+  .coming-soon-card p {
+    font-size: 1.1rem;
+    color: #ddd;
+    font-weight: 500;
+  }
+  
+  /* 🎬 Smooth Fade + Scale Animation */
+@keyframes fadeInScale {
+    0% {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .player-container iframe,
+  .coming-soon-card {
+    animation: fadeInScale 0.6s ease forwards;
+  }
+  
+  /*......audio preview for track-cards in browse.html*/
+  .audio-player {
+    width: 150px;
+    height: 25px;
+    margin-top: 5px;
+    border-radius: 8px;
+  }
+  
+  
+  
+  
+
+  

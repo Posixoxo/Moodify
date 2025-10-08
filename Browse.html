@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Browse</title>
+        <link rel="stylesheet" href="style.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Outfit:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Young+Serif&display=swap" rel="stylesheet">
+    </head>
+<body>
+    <div class="utility-container">
+        <button id="dark-mode-toggle" aria-label="Toggle Dark/Light Mode">
+            ☀️
+        </button>
+    </div>
+
+    <header>
+        <nav class="nbar">
+            <a href="index.html" class="logo-t">
+                <h1>Moodify</h1>
+            </a>
+            <img src="Images/icon-menu.svg" alt="menu-open" id="menu-open-btn">
+        </nav>
+
+        <div id="mobile-nav-container">
+            <div id="mobile-nav">
+                <img src="Images/icon-menu-close.svg" alt="close menu" id="menu-close-btn">
+                <a href="index.html" class="playlist-btn">Home</a>
+                <a href="Addyourplaylist.html" class="playlist-btn">Add Your Playlist🎶</a>
+                <div class="social-icons">
+                    <img src="Images/icon-instagram.svg" alt="insta">
+                    <img src="Images/icon-facebook.svg" alt="facebook">
+                    <img src="Images/icon-twitter.svg" alt="X">
+                  </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section>
+            <div class="top-image">
+            <img src="Images/apple-music (1).svg" alt="AP-1" class="APP-1">
+            <img src="Images/Airpods.png" alt="AP-2" class="APP-1">
+            </div>
+
+            <section id="playlist-app">
+                <div class="playlist-controls">
+                    <h2>Pick a Mood / Build Your Vibe</h2>
+
+                    <!-- ADDED: Random vibe -->
+                    <div class="extra-controls">
+                        <button id="randomVibeBtn">🎲 Random Vibe</button>
+                    </div>
+    
+                    <!-- ADDED: Vibe Builder (time of day + energy + mood) -->
+                    <div id="vibeBuilder" class="vibe-builder">
+                        <label>Time of day:
+                            <select id="timeOfDay">
+                                <option value="">any</option>
+                                <option value="morning">Morning</option>
+                                <option value="night">Night</option>
+                                <option value="weekend">Weekend</option>
+                            </select>
+                        </label>
+    
+                        <label>Energy:
+                            <select id="energy">
+                                <option value="">any</option>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="hype">Hype</option>
+                            </select>
+                        </label>
+    
+                        <label>Mood:
+                            <select id="vibeMood">
+                                <option value="">any</option>
+                                <option value="happy">Happy</option>
+                                <option value="chill">Chill</option>
+                                <option value="workout">Workout</option>
+                                <option value="heartbreak">Heartbreak</option>
+                                <option value="afro">Afro</option>
+                                <option value="pop">Pop</option>
+                                <option value="hip-hop">Hip-Hop</option>
+                                <option value="party">Party</option>
+                                <option value="comedy">Comedy</option>
+                                <option value="christian & gospel">Christian & Gospel</option>
+                                <option value="r & b">R & B</option>
+                                <option value="trending">Trending</option>
+                                <option value="sleep">Sleep</option>
+                                <option value="at home">At Home</option>
+                                <option value="rock">Rock</option>
+                                <option value="decades">Decades</option>
+                                <option value="jazz">Jazz</option>
+                                <option value="anime">Anime</option>
+                                <option value="love">Love</option>
+                                <option value="throwback">Throwback</option>
+                                <option value="focus">Focus</option>
+                                <option value="soul">Soul</option>
+                                <option value="instrumental">Instrumental</option>
+                                <option value="kids & family">Kids & Family</option>
+                                <option value="caribbean">Caribbean</option>
+                                <option value="dance & electronics">Dance and Electronics</option>
+                                <option value="reggae">Reggae</option>
+                                <option value="k-pop">K-pop</option>
+                                <option value="blues">Blues</option>
+                                <option value="alternative">Alternative</option>
+                                <option value="travel">Travel</option>
+                                <option value="nature & noise">Nature & Noise</option>
+                                <option value="summer">Summer</option>
+                                <option value="classical">Classical</option>
+                                <option value="country">Country</option>
+                                <option value="latin">Latin</option>
+                                <option value="devotional">Devotional</option>
+                                <option value="mixed by">Mixed by</option>
+                            </select>
+                        </label>
+    
+                        <button id="buildVibeBtn">Build My Vibe</button>
+                    </div>
+    
+                    <!-- ADDED: Visualizer (changes color with body mood class) -->
+                    <div id="visualizer" aria-hidden="true">
+                        <span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                </div>
+    
+                <!-- ADDED: playlist output container -->
+                <div id="playlist-container" class="playlist-container">
+                    <!-- JS will inject playlist cards here -->
+                </div>
+            </section>
+            <!-- END ADDED playlist app UI -->
+
+            <div class="top-image">
+                <img src="Images/Apple Music.png" alt="AP-4" class="APP-1">
+                <img src="Images/Accessories.png" alt="Accessories" class="APP-1">
+            </div>
+        </section>
+    </main>
+
+    <hr>
+    <footer>
+        <span>&copy2025 Moodify. All Right Reserved.</span>
+    </footer>
+
+<script src="script.js"></script>
+</body>
+</html>

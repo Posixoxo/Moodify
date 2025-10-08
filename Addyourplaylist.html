@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Your Playlist</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Outfit:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Young+Serif&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="utility-container">
+        <button id="dark-mode-toggle" aria-label="Toggle Dark/Light Mode">
+            ☀️
+        </button>
+    </div>
+
+    <header>
+        <nav class="nbar">
+            <a href="index.html" class="logo-t">
+                <h1>Moodify</h1>
+            </a>
+            <img src="Images/icon-menu.svg" alt="menu-open" id="menu-open-btn">
+        </nav>
+
+        <div id="mobile-nav-container">
+            <div id="mobile-nav">
+                <img src="Images/icon-menu-close.svg" alt="close menu" id="menu-close-btn">
+                <a href="index.html" class="playlist-btn">Home</a>
+                <a href="Addyourplaylist.html" class="playlist-btn">Add Your Playlist🎶</a>
+                <div class="social-icons">
+                    <img src="Images/icon-instagram.svg" alt="insta">
+                    <img src="Images/icon-facebook.svg" alt="facebook">
+                    <img src="Images/icon-twitter.svg" alt="X">
+                  </div>
+            </div>
+        </div>
+    </header>
+    <main>
+        <form name="add-playlist" method="POST" data-netlify="true" class="playlist-form" id="Get-response">
+            <input type="hidden" name="form-name" value="add-playlist">
+          
+            <h2>Share Your Playlist 🎶</h2>
+          
+            <label for="name">What’s your name? *</label>
+            <input type="text" id="name" name="name" required>
+          
+            <label for="email">Where can we reach you? (Email) *</label>
+            <input type="email" id="email" name="email" required>
+          
+            <label for="playlist-name">What’s your playlist called? *</label>
+            <input type="text" id="playlist-name" name="playlist-name" required>
+          
+            <label for="playlist-link">Drop your playlist link (Spotify, Apple Music, etc.) *</label>
+            <input type="url" id="playlist-link" name="playlist-link" placeholder="https://..." required>
+          
+            <label for="genre">What’s the main vibe or genre?</label>
+            <select id="genre" name="genre">
+              <option value="">Select Genre</option>
+              <option value="Pop">Pop</option>
+              <option value="Hip-Hop">Hip-Hop</option>
+              <option value="Afrobeats">Afrobeats</option>
+              <option value="Jazz">Jazz</option>
+              <option value="Other">Other</option>
+            </select>
+          
+            <label for="description">Tell us a bit about it — what makes this playlist special?</label>
+            <textarea id="description" name="description" rows="4" placeholder="Why is this playlist awesome?"></textarea>
+          
+            <button type="submit">Submit Playlist</button>
+          </form>
+          
+    </main>
+    <hr>
+    <footer>
+        <span>&copy2025 Moodify. All Right Reserved.</span>
+    </footer>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+  const form = document.getElementById("Get-response");
+
+  form.addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const formData = new FormData(form);
+
+    fetch("/", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(formData).toString()
+    })
+    .then(() => {
+      alert("✅ Thank you! We'll be in touch soon.");
+      form.reset();
+    })
+    .catch((error) => {
+      alert("❌ Oops! Something went wrong: " + error);
+    });
+  });
+});
+</script>
+
+    <script src="script.js"></script>
+</body>
+</html>

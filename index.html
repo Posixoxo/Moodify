@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moodify</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Outfit:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Young+Serif&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="utility-container">
+        <button id="dark-mode-toggle" aria-label="Toggle Dark/Light Mode">
+            ☀️
+        </button>
+    </div>
+
+    <header>
+        <nav class="nbar">
+            <a href="index.html" class="logo-t"><h1>Moodify</h1></a>
+            <img src="Images/icon-menu.svg" alt="menu-open" id="menu-open-btn">
+        </nav>
+
+        <div id="mobile-nav-container">
+            <div id="mobile-nav">
+                <img src="Images/icon-menu-close.svg" alt="close menu" id="menu-close-btn">
+                <a href="index.html" class="playlist-btn">Home</a>
+                <a href="Addyourplaylist.html" class="playlist-btn">Add Your Playlist🎶</a>
+              <div class="social-icons">
+                <a href="https://www.instagram.com/posixoxo_/"><img src="Images/icon-instagram.svg" alt="instagram"></a>
+                <a href="javascipt.void"><img src="Images/icon-facebook.svg" alt="facebook"></a>
+                <a href="https://x.com/PosiXoxo"><img src="Images/icon-twitter.svg" alt="X"></a>
+              </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section>
+            <div class="idiv-1">
+                <input type="text" placeholder="Find playlists by keyword" class="input-1" id="searchInput">
+             <button class="search-arrow-btn" aria-label="Search" id="searchButton">
+                &#x279C;  
+             </button>
+            </div>
+
+            <section class=" display: flex; flex-direction: column; align-items: center;">
+                <div id="search-results" class="results-container"></div>
+            </section>
+            
+            <div class="mood-grid">
+                <button class="mood-button" data-mood="happy">Happy</button>
+                <button class="mood-button" data-mood="chill">Chill</button>
+                <button class="mood-button" data-mood="workout">Workout</button>
+                <button class="mood-button" data-mood="heartbreak">Heartbreak</button>
+                
+              </div>
+        </section>
+
+        <section class="artist-section">
+            <div class="artist-grid-container">
+                
+                <button class="artist-button" data-index="0">
+                    <div class="butt-img">
+                        <img src="Images/David.jpg" alt="Davido" class="img-1">
+                        <p>Davido</p>
+                    </div>
+                </button>
+        
+                <button class="artist-button" data-index="1">
+                    <div class="butt-img">
+                        <img src="Images/Asake.jpg" alt="Asake" class="img-1">
+                        <p>Asake</p>
+                    </div>
+                </button>
+              
+                <button class="artist-button" data-index="2">
+                    <div class="butt-img">
+                        <img src="Images/Burna.jpg" alt="Burna Boy" class="img-1">
+                        <p>Burna Boy</p>
+                    </div>
+                </button>
+                
+            </div>
+        </section>
+    </main>
+
+    <section class="butt-3">
+        <button class="color-border-button">
+            <div class="button-content-wrapper"> 
+                <a href="Browse.html" class="play-link" aria-label="Browse Other Moods">
+                    <img src="Images/play-button.png" alt="play-butt" class="play-b">
+                </a>
+                <span>Browse Other Moods</span>
+            </div>
+        </button>
+    </section>
+<hr>
+    <footer>
+        <span>&copy2025 Moodify. All Right Reserved.</span>
+    </footer>
+
+ <!-- 👇 VERY IMPORTANT: script should load last -->
+    <script src="script.js"></script>
+</body>
+</html>

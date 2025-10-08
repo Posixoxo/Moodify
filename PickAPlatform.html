@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Browse</title>
+        <link rel="stylesheet" href="style.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Outfit:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Young+Serif&display=swap" rel="stylesheet">
+    </head>
+<body>
+    <div class="utility-container">
+        <button id="dark-mode-toggle" aria-label="Toggle Dark/Light Mode">
+            ☀️
+        </button>
+    </div>
+
+    <header>
+        <nav class="nbar">
+            <a href="index.html" class="logo-t">
+                <h1>Moodify</h1>
+            </a>
+            <img src="Images/icon-menu.svg" alt="menu-open" id="menu-open-btn">
+        </nav>
+
+        <div id="mobile-nav-container">
+            <div id="mobile-nav">
+                <img src="Images/icon-menu-close.svg" alt="close menu" id="menu-close-btn">
+                <a href="index.html" class="playlist-btn">Home</a>
+                <a href="Addyourplaylist.html" class="playlist-btn">Add Your Playlist🎶</a>
+                <div class="social-icons">
+                    <img src="Images/icon-instagram.svg" alt="insta">
+                    <img src="Images/icon-facebook.svg" alt="facebook">
+                    <img src="Images/icon-twitter.svg" alt="X">
+                  </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section>
+            <div class="top-image">
+            <img src="Images/apple-music (1).svg" alt="AP-1" class="APP-1">
+            <img src="Images/Airpods.png" alt="AP-2" class="APP-1">
+            </div>
+
+
+            <div class="container">
+                <h2>Choose Your Prefered Music Service</h2>
+                <div class="logos-link">
+                    <img src="Images/apple-music.svg" alt="AP-3" class="logo" id="apple">
+                    <img src="Images/spotify.svg" alt="SP" class="logo" id="spotify">
+                    <img src="Images/audiomack.svg" alt="AUD" class="logo" id="audiomack">
+                </div>
+                <div id="player-container" class="player-container"></div>
+            </div>
+
+            <div class="top-image">
+                <img src="Images/Apple Music.png" alt="AP-4" class="APP-1">
+                <img src="Images/Accessories.png" alt="Accessories" class="APP-1">
+            </div>
+        </section>
+    </main>
+
+    <hr>
+    <footer>
+        <span>&copy2025 Moodify. All Right Reserved.</span>
+    </footer>
+
+<script src="script.js"></script>
+<script>
+    const mood = localStorage.getItem('selectedMood');
+    const spotifyButton = document.getElementById('spotify');
+    const appleButton = document.getElementById('apple');
+    const audiomackButton = document.getElementById('audiomack');
+    const playerContainer = document.getElementById('player-container');
+  
+    // 🎧 Mood → Spotify Playlist Mapping
+    const moodPlaylists = {
+      happy: "https://open.spotify.com/embed/playlist/37i9dQZF1DXdPec7aLTmlC",
+      chill: "https://open.spotify.com/embed/playlist/37i9dQZF1DX889U0CL85jj",
+      workout: "https://open.spotify.com/embed/playlist/37i9dQZF1DX70RN3TfWWJh",
+      heartbreak: "https://open.spotify.com/embed/playlist/37i9dQZF1DX7qK8ma5wgG1"
+    };
+  
+    // Helper: fade out then replace content smoothly
+    function replacePlayerContent(html) {
+      if (!playerContainer) return;
+      playerContainer.style.opacity = "0";
+      setTimeout(() => {
+        playerContainer.innerHTML = html;
+        playerContainer.style.opacity = "1";
+      }, 200);
+    }
+  
+    // 🟢 Spotify Player
+    spotifyButton.addEventListener('click', () => {
+      const playlistUrl = moodPlaylists[mood];
+      if (playlistUrl) {
+        replacePlayerContent(`
+          <iframe 
+            src="${playlistUrl}" 
+            width="100%" 
+            height="480" 
+            frameborder="0" 
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+            loading="lazy" 
+            style="border-radius: 16px;">
+          </iframe>`);
+      } else {
+        replacePlayerContent(`<p style="color:#ccc;">No playlist found for that mood yet.</p>`);
+      }
+    });
+  
+    // 🍎 Apple Music Placeholder
+    appleButton.addEventListener('click', () => {
+      replacePlayerContent(`
+        <div class="coming-soon-card">
+          <img src="Images/apple-music-logo.png" alt="Apple Music" class="coming-soon-logo">
+          <p>Apple Music integration coming soon 🎶</p>
+        </div>`);
+    });
+  
+    // 🎵 Audiomack Placeholder
+    audiomackButton.addEventListener('click', () => {
+      replacePlayerContent(`
+        <div class="coming-soon-card">
+          <img src="Images/audiomack-logo.png" alt="Audiomack" class="coming-soon-logo">
+          <p>Audiomack integration coming soon 🎧</p>
+        </div>`);
+    });
+  </script>  
+</body>
+</html>
