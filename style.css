@@ -38,6 +38,7 @@ main {
     background-color: rgba(43, 43, 43, 1);
     color: #2b2b2b; /* Dark text/icon */
     font-size: 1.2rem;
+    margin-left: 50px;
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;

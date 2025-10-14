@@ -1,7 +1,18 @@
-/* script.js — working version with mood-mapping fixes + clickable playlists + subtle mood pulse */
 document.addEventListener('DOMContentLoaded', () => {
-  const BACKEND = 'http://localhost:3000'; // adjust if your backend runs elsewhere
+  // ✅ BACKEND URL (works both locally and on Netlify)
+  const BACKEND = '/.netlify/functions';
   const isBrowsePage = /browse\.html$/i.test(window.location.pathname) || /browse/i.test(window.location.pathname);
+  
+  console.log('🔧 Backend URL:', BACKEND);
+  console.log('🌐 Environment:', window.location.hostname);
+
+  /* -------------------------
+     IN-MEMORY STATE (replacing localStorage for compatibility)
+     ------------------------- */
+  const appState = {
+    darkMode: false,
+    selectedMood: null
+  };
 
   /* -------------------------
      NAV / MOBILE MENU
@@ -9,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const menuContainer = document.getElementById('mobile-nav-container');
   const openMenuIcon = document.querySelector('.nbar img[alt="menu-open"]');
   const closeMenuIcon = document.getElementById('menu-close-btn');
+  
   if (openMenuIcon && menuContainer)
     openMenuIcon.addEventListener('click', () => menuContainer.classList.add('open'));
   if (closeMenuIcon && menuContainer)
@@ -20,11 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
   /* -------------------------
-     DARK MODE
+     DARK MODE (with fallback to localStorage for persistence)
      ------------------------- */
   const toggleButton = document.getElementById('dark-mode-toggle');
   const body = document.body;
   const localStorageKey = 'moodify-dark-mode';
+  
   const applyTheme = (isLightModeString) => {
     const isLightMode = isLightModeString === 'true';
     if (isLightMode) {
@@ -34,15 +47,28 @@ document.addEventListener('DOMContentLoaded', () => {
       body.classList.remove('light-mode');
       if (toggleButton) toggleButton.textContent = '☀️';
     }
+    appState.darkMode = !isLightMode;
   };
-  const savedTheme = localStorage.getItem(localStorageKey);
-  if (savedTheme !== null) applyTheme(savedTheme);
+  
+  // Try to load saved theme
+  try {
+    const savedTheme = localStorage.getItem(localStorageKey);
+    if (savedTheme !== null) applyTheme(savedTheme);
+  } catch (e) {
+    console.log('localStorage not available, using session state');
+  }
+  
   if (toggleButton)
     toggleButton.addEventListener('click', () => {
       body.classList.toggle('light-mode');
       const isLightMode = body.classList.contains('light-mode');
-      localStorage.setItem(localStorageKey, isLightMode);
+      try {
+        localStorage.setItem(localStorageKey, isLightMode);
+      } catch (e) {
+        console.log('localStorage not available');
+      }
       toggleButton.textContent = isLightMode ? '🌙' : '☀️';
+      appState.darkMode = !isLightMode;
     });
 
   /* -------------------------
@@ -84,23 +110,29 @@ document.addEventListener('DOMContentLoaded', () => {
     { name: "The Weekend", image: "Images/The Weekend.jpg" },
     { name: "Tychomusic", image: "Images/Tychomusic.jpg" },
   ];
+  
   const artistButtons = document.querySelectorAll('.artist-button');
   let currentIndex = 0;
-  const rotationInterval = 10000;
+  const ARTIST_ROTATION_INTERVAL_MS = 10000; // 10 seconds
+  
   const rotateContent = () => {
     artistButtons.forEach((button, buttonIndex) => {
       const artistIndex = (currentIndex + buttonIndex) % allArtists.length;
       const currentArtist = allArtists[artistIndex];
       const img = button.querySelector('.img-1');
       const p = button.querySelector('p');
-      if (img) { img.src = currentArtist.image; img.alt = currentArtist.name; }
+      if (img) { 
+        img.src = currentArtist.image; 
+        img.alt = currentArtist.name; 
+      }
       if (p) p.textContent = currentArtist.name;
     });
     currentIndex = (currentIndex + 1) % allArtists.length;
   };
+  
   if (artistButtons && artistButtons.length) {
     rotateContent();
-    setInterval(rotateContent, rotationInterval);
+    setInterval(rotateContent, ARTIST_ROTATION_INTERVAL_MS);
   }
 
   /* -------------------------
@@ -114,42 +146,73 @@ document.addEventListener('DOMContentLoaded', () => {
     { id: 5, title: "Heartbreak Slow", description: "Emotional slow-tempo songs.", cover: "Images/covers/heartbreak.jpg", tags: ["heartbreak"], time: ["night"], energy: ["low"], spotify: "", apple: "", audiomack: "" }
   ];
 
-  /* Helper: showPlaylists (now clickable) */
+  /* -------------------------
+     UTILITY: URL VALIDATION
+     ------------------------- */
+  function isValidUrl(url) {
+    if (!url) return false;
+    try {
+      const parsed = new URL(url);
+      return ['http:', 'https:'].includes(parsed.protocol);
+    } catch {
+      return false;
+    }
+  }
+
+  /* -------------------------
+     UTILITY: HTML ESCAPING
+     ------------------------- */
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  /* -------------------------
+     HELPER: showPlaylists (with URL validation)
+     ------------------------- */
   function showPlaylists(list) {
     const container = document.getElementById('playlist-container');
     if (!container) return;
     container.innerHTML = '';
+    
     list.forEach(p => {
       const card = document.createElement('div');
       card.className = 'playlist-card';
-      // keep your markup but add a data-url for click handler
       const url = p.spotify || p.apple || p.audiomack || p.url || p.spotifyUrl || '';
+      
       card.innerHTML = `
         <img src="${p.cover || 'Images/default-cover.png'}" alt="${escapeHtml(p.title || '')}">
         <h3>${escapeHtml(p.title || '')}</h3>
         <p>${escapeHtml(p.description || '')}</p>
         ${p.spotify ? `<audio controls src="${p.spotify}" class="audio-player"></audio>` : `<p style="color:gray;">Preview not available</p>`}
         <div class="platform-links">
-          ${p.apple ? `<a href="${p.apple}" target="_blank">Apple Music</a>` : ''}
-          ${p.audiomack ? `<a href="${p.audiomack}" target="_blank">Audiomack</a>` : ''}
+          ${p.apple ? `<a href="${p.apple}" target="_blank" rel="noopener noreferrer">Apple Music</a>` : ''}
+          ${p.audiomack ? `<a href="${p.audiomack}" target="_blank" rel="noopener noreferrer">Audiomack</a>` : ''}
         </div>
       `;
-      // attach dataset url so click handler can open it
-      if (url) card.dataset.openUrl = url;
-
-      // Append then attach click handler to each card
+      
+      if (url && isValidUrl(url)) {
+        card.dataset.openUrl = url;
+      }
+      
       container.appendChild(card);
     });
 
-    // Attach click handling once (delegation) so cards are clickable and audio clicks are ignored
+    // Click handling with URL validation
     container.querySelectorAll('.playlist-card').forEach(card => {
       card.addEventListener('click', (e) => {
-        // If user clicked inside the audio player controls, do nothing
         const tag = e.target.tagName.toLowerCase();
         if (tag === 'audio' || tag === 'source' || e.target.closest('.audio-player')) return;
+        
         const urlToOpen = card.dataset.openUrl;
-        if (!urlToOpen) return;
-        window.open(urlToOpen, '_blank', 'noopener');
+        if (!urlToOpen || !isValidUrl(urlToOpen)) return;
+        
+        window.open(urlToOpen, '_blank', 'noopener,noreferrer');
       });
     });
   }
@@ -160,11 +223,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function clearMoodClasses() {
     body.classList.remove('mood-happy','mood-chill','mood-workout','mood-heartbreak');
   }
+  
   function setMoodBackground(mood) {
     clearMoodClasses();
     if (!mood) return;
     body.classList.add(`mood-${mood}`);
   }
+  
   function setMoodBackgroundFromPlaylist(playlist) {
     if (!playlist || !playlist.tags) return;
     const known = ['chill','happy','workout','heartbreak'];
@@ -173,18 +238,31 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* -------------------------
-     MOOD MAPPING (unchanged)
+     MOOD MAPPING
      ------------------------- */
+  const MOOD_KEYWORDS = {
+    chill: ['chill', 'lo-fi', 'lofi', 'study', 'sleep', 'instrumental', 'jazz', 'classical', 'r & b', 'r&b', 'soul'],
+    happy: ['happy', 'party', 'pop', 'afro', 'summer', 'dance'],
+    workout: ['workout', 'hype', 'gym', 'energetic', 'high'],
+    heartbreak: ['sad', 'heart', 'heartbreak', 'emo', 'love', 'romantic', 'moody']
+  };
+
   function mapToKnownMood(raw, energy = '') {
     if (!raw) {
       if (/(hype|high|energetic|party)/i.test(energy)) return 'workout';
       return 'chill';
     }
+    
     const r = (raw || '').toString().toLowerCase();
-    if (r.includes('chill') || r.includes('lo-fi') || r.includes('study') || r.includes('sleep') || r.includes('instrumental') || r.includes('jazz') || r.includes('classical') || r.includes('r & b') || r.includes('soul')) return 'chill';
-    if (r.includes('happy') || r.includes('party') || r.includes('pop') || r.includes('afro') || r.includes('summer') || r.includes('dance')) return 'happy';
-    if (r.includes('workout') || r.includes('hype') || r.includes('gym') || r.includes('energetic') || r.includes('high')) return 'workout';
-    if (r.includes('sad') || r.includes('heart') || r.includes('heartbreak') || r.includes('emo') || r.includes('love') || r.includes('romantic') || r.includes('moody')) return 'heartbreak';
+    
+    // Check against keyword mapping
+    for (const [mood, keywords] of Object.entries(MOOD_KEYWORDS)) {
+      if (keywords.some(keyword => r.includes(keyword))) {
+        return mood;
+      }
+    }
+    
+    // Fallback to energy-based detection
     if (/(hype|high|energetic|party)/i.test(energy)) return 'workout';
     return 'happy';
   }
@@ -193,52 +271,98 @@ document.addEventListener('DOMContentLoaded', () => {
      VISUALIZER & SOFT PULSE (only on Browse page)
      ------------------------- */
   const visualizer = document.getElementById('visualizer');
+  let visualizerTimeout = null;
+  let bodyPulseTimeout = null;
+
   function animateVisualizer(duration = 1400) {
-    if (!isBrowsePage) return; // don't animate on index page
+    if (!isBrowsePage) return;
+    
     if (!visualizer) {
-      // still do soft body pulse if visualizer missing
       triggerSoftPulse(duration);
       return;
     }
+    
     visualizer.classList.add('active');
-    if (visualizer._timeout) clearTimeout(visualizer._timeout);
-    visualizer._timeout = setTimeout(() => {
+    
+    if (visualizerTimeout) clearTimeout(visualizerTimeout);
+    visualizerTimeout = setTimeout(() => {
       visualizer.classList.remove('active');
-      visualizer._timeout = null;
+      visualizerTimeout = null;
     }, duration);
-    // pulse body glow along with visualizer
+    
     triggerSoftPulse(duration);
   }
 
   function triggerSoftPulse(duration = 1400) {
     if (!isBrowsePage) return;
+    
     body.classList.add('mood-pulse');
-    if (body._pulseTimeout) clearTimeout(body._pulseTimeout);
-    body._pulseTimeout = setTimeout(() => {
+    
+    if (bodyPulseTimeout) clearTimeout(bodyPulseTimeout);
+    bodyPulseTimeout = setTimeout(() => {
       body.classList.remove('mood-pulse');
-      body._pulseTimeout = null;
+      bodyPulseTimeout = null;
     }, duration + 200);
   }
 
   /* -------------------------
-     FRONTEND SEARCH (Spotify backend)
+     ✅ ENHANCED FETCH WITH RETRY LOGIC
+     ------------------------- */
+  async function fetchWithRetry(url, options = {}, retries = 2) {
+    for (let i = 0; i <= retries; i++) {
+      try {
+        const response = await fetch(url, {
+          ...options,
+          headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+          }
+        });
+        
+        if (response.ok) return response;
+        
+        // Don't retry on client errors (4xx)
+        if (response.status >= 400 && response.status < 500) {
+          throw new Error(`Client error: ${response.status}`);
+        }
+        
+        // Retry on server errors (5xx) or network issues
+        if (i === retries) {
+          throw new Error(`Server error after ${retries + 1} attempts: ${response.status}`);
+        }
+        
+        // Wait before retry (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, i)));
+        
+      } catch (error) {
+        if (i === retries) throw error;
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, i)));
+      }
+    }
+  }
+
+  /* -------------------------
+     ✅ SPOTIFY SEARCH - NETLIFY OPTIMIZED
      ------------------------- */
   const searchResultsEl = document.getElementById('search-results') || document.querySelector('.search-results');
 
   function detectMoodFromQuery(query) {
     if (!query) return null;
     const q = query.toLowerCase();
-    if (q.includes('chill') || q.includes('lofi') || q.includes('study')) return 'chill';
-    if (q.includes('happy') || q.includes('party') || q.includes('pop')) return 'happy';
-    if (q.includes('workout') || q.includes('gym') || q.includes('hype')) return 'workout';
-    if (q.includes('sad') || q.includes('heart') || q.includes('break')) return 'heartbreak';
+    
+    for (const [mood, keywords] of Object.entries(MOOD_KEYWORDS)) {
+      if (keywords.some(keyword => q.includes(keyword))) {
+        return mood;
+      }
+    }
+    
     return null;
   }
 
   async function searchSpotify(query) {
     const resultsContainer = searchResultsEl;
     if (!resultsContainer) {
-      console.error("❌ 'search-results' element not found. Make sure index.html has <div id=\"search-results\"> or class=\"search-results\".");
+      console.error("❌ 'search-results' element not found.");
       return;
     }
 
@@ -249,49 +373,56 @@ document.addEventListener('DOMContentLoaded', () => {
     animateVisualizer(1800);
 
     try {
-      const response = await fetch(`${BACKEND}/api/spotify/search?q=${encodeURIComponent(query)}&limit=6`);
-      if (!response.ok) throw new Error(`Spotify backend error ${response.status}`);
+      // ✅ NETLIFY FUNCTION ENDPOINT
+      const searchUrl = `${BACKEND}/spotify-search?q=${encodeURIComponent(query)}&limit=6`;
+      
+      const response = await fetchWithRetry(searchUrl, {}, 2);
       const data = await response.json();
 
       const tracks = data.tracks || [];
       const playlistsResult = data.playlists || [];
 
       if (!tracks.length && !playlistsResult.length) {
-        resultsContainer.innerHTML = `<p>No results found for "<strong>${escapeHtml(query)}</strong>".</p>`;
+        resultsContainer.innerHTML = `<p>No results found for "<strong>${escapeHtml(query)}</strong>". Try different keywords!</p>`;
         return;
       }
 
       let html = `<div class="results-inner" style="max-width:900px;margin:18px auto;">`;
 
+      // Render playlists
       if (playlistsResult.length) {
         html += `<div class="results-playlists" style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:14px;">`;
         playlistsResult.forEach(pl => {
           const url = pl.spotifyUrl || (pl.external_urls && pl.external_urls.spotify) || '#';
+          const validUrl = isValidUrl(url) ? url : '#';
+          
           html += `
             <div class="result-playlist-card" style="width:220px;background:rgba(0,0,0,0.35);padding:10px;border-radius:10px;text-align:center;">
               <img src="${pl.image || 'Images/default-cover.png'}" alt="${escapeHtml(pl.name)}" style="width:100%;height:120px;object-fit:cover;border-radius:6px;">
               <h4 style="margin:8px 0 4px;">${escapeHtml(pl.name)}</h4>
-              <p style="font-size:13px;color:#ddd;margin:0 0 8px;">By ${escapeHtml(pl.owner || '')}</p>
-              <a href="${url}" target="_blank" rel="noopener" style="display:inline-block;padding:8px 10px;border-radius:8px;background:#1DB954;color:#fff;text-decoration:none;font-weight:600;">Open Playlist</a>
+              <p style="font-size:13px;color:#ddd;margin:0 0 8px;">By ${escapeHtml(pl.owner || 'Spotify')}</p>
+              <a href="${validUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:8px 10px;border-radius:8px;background:#1DB954;color:#fff;text-decoration:none;font-weight:600;">Open Playlist</a>
             </div>
           `;
         });
         html += `</div>`;
       }
 
+      // Render tracks
       if (tracks.length) {
         html += `<div class="results-tracks" style="display:flex;flex-direction:column;gap:12px;">`;
         tracks.forEach((track) => {
           const img = track.albumArt || 'Images/default-cover.png';
-          const title = escapeHtml(track.title || track.name || '');
-          const artist = escapeHtml(track.artist || (track.artists && track.artists.join(', ')) || '');
+          const title = escapeHtml(track.title || track.name || 'Unknown Track');
+          const artist = escapeHtml(track.artist || (track.artists && track.artists.join(', ')) || 'Unknown Artist');
           const album = escapeHtml(track.album || '');
           const preview = track.previewUrl || track.preview_url || '';
           const spotifyUrl = track.spotifyUrl || (track.external_urls && track.external_urls.spotify) || '#';
+          const validSpotifyUrl = isValidUrl(spotifyUrl) ? spotifyUrl : '#';
 
           const playerHtml = preview
             ? `<audio controls preload="none" src="${preview}" style="width:100%;margin-top:8px;"></audio>`
-            : `<a href="${spotifyUrl}" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;padding:8px 10px;border-radius:8px;background:#1DB954;color:#fff;text-decoration:none;font-weight:600;">Play on Spotify</a>`;
+            : `<a href="${validSpotifyUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:8px;padding:8px 10px;border-radius:8px;background:#1DB954;color:#fff;text-decoration:none;font-weight:600;">Play on Spotify</a>`;
 
           html += `
             <div class="result-track" style="display:flex;gap:12px;align-items:center;padding:10px;background:rgba(0,0,0,0.25);border-radius:10px;">
@@ -314,37 +445,48 @@ document.addEventListener('DOMContentLoaded', () => {
       html += `</div>`;
       resultsContainer.innerHTML = html;
 
-      // after rendering results, infer mood if we didn't detect one
+      // Infer mood if not detected
       if (!detected) {
         const fallbackMood = mapToKnownMood(query);
         if (isBrowsePage) setMoodBackground(fallbackMood);
       }
 
       animateVisualizer(1000);
+      
     } catch (error) {
       console.error("Spotify search error:", error);
-      resultsContainer.innerHTML = `<p style="color: red;">Something went wrong while searching Spotify. Please try again later.</p>`;
+      resultsContainer.innerHTML = `
+        <div style="text-align:center;padding:20px;">
+          <p style="color: #ff6b6b;font-size:18px;margin-bottom:10px;">⚠️ Unable to search Spotify</p>
+          <p style="color: #ccc;">Please check your connection and try again.</p>
+          <button onclick="location.reload()" style="margin-top:15px;padding:10px 20px;background:#1DB954;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Retry</button>
+        </div>
+      `;
     }
   }
 
-  // small helper to escape HTML (prevents injection in inserted strings)
-  function escapeHtml(str) {
-    if (!str) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
+  /* -------------------------
+     ✅ DEBOUNCED SEARCH INPUT
+     ------------------------- */
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
   }
 
   const searchButton = document.getElementById('searchButton');
   const searchInput = document.getElementById('searchInput');
+  
   if (searchButton && searchInput) {
+    // Direct search on button click
     searchButton.addEventListener('click', () => {
       const query = searchInput.value.trim();
       if (query) searchSpotify(query);
     });
+    
+    // Search on Enter key
     searchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -352,24 +494,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if (query) searchSpotify(query);
       }
     });
+    
+    // Optional: Live search as user types (debounced) - ENABLED
+    const debouncedSearch = debounce((query) => {
+      if (query && query.length > 2) searchSpotify(query);
+    }, 800);
+    
+    searchInput.addEventListener('input', (e) => {
+      debouncedSearch(e.target.value.trim());
+    });
   }
 
   /* -------------------------
-     RANDOM / BUILD VIBE (Enhanced)
+     ✅ FETCH SPOTIFY PLAYLIST - NETLIFY OPTIMIZED
      ------------------------- */
-  const playlistContainerEl = document.getElementById('playlist-container');
-  const randomBtnEl = document.getElementById('randomVibeBtn');
-  const buildBtnEl = document.getElementById('buildVibeBtn');
-
-  const timeOptions = ['morning', 'afternoon', 'evening', 'night', 'weekend'];
-  const energyOptions = ['low', 'medium', 'hype', 'high'];
-  const moodOptions = ['happy', 'sad', 'chill', 'heartbreak', 'workout', 'afro', 'pop', 'hip-hop'];
-
   async function fetchSpotifyPlaylist(query, limit = 6) {
     try {
-      const res = await fetch(`${BACKEND}/api/spotify/search?q=${encodeURIComponent(query)}&limit=${limit}`);
-      if (!res.ok) throw new Error('Spotify backend error ' + res.status);
+      // ✅ NETLIFY FUNCTION ENDPOINT
+      const searchUrl = `${BACKEND}/spotify-search?q=${encodeURIComponent(query)}&limit=${limit}`;
+      
+      const res = await fetchWithRetry(searchUrl, {}, 2);
       const data = await res.json();
+      
       if (data.playlists && data.playlists.length) {
         return data.playlists.map(pl => ({
           cover: pl.image || '',
@@ -381,6 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
           tags: []
         }));
       }
+      
       if (Array.isArray(data.tracks) && data.tracks.length) {
         return data.tracks.map(t => ({
           cover: t.albumArt || '',
@@ -392,6 +539,7 @@ document.addEventListener('DOMContentLoaded', () => {
           tags: []
         }));
       }
+      
       return [];
     } catch (err) {
       console.error('Spotify fetch error:', err);
@@ -399,22 +547,44 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  /* -------------------------
+     PLAYLIST DISPLAY HANDLER
+     ------------------------- */
+  const playlistContainerEl = document.getElementById('playlist-container');
+
   async function handlePlaylistDisplay(matches) {
     if (!matches || !matches.length) {
-      if (playlistContainerEl) playlistContainerEl.innerHTML = `<p>No playlists found for this vibe.</p>`;
+      if (playlistContainerEl) {
+        playlistContainerEl.innerHTML = `
+          <div style="text-align:center;padding:30px;">
+            <p style="font-size:18px;color:#ccc;">No playlists found for this vibe.</p>
+            <p style="color:#888;margin-top:10px;">Try adjusting your preferences!</p>
+          </div>
+        `;
+      }
       return;
     }
+    
     animateVisualizer(1600);
+    
     if (matches[0] && matches[0].tags && matches[0].tags.length) {
       setMoodBackgroundFromPlaylist(matches[0]);
     } else {
       const inferred = mapToKnownMood(matches[0].title || matches[0].description || '');
       setMoodBackground(inferred);
     }
+    
     if (playlistContainerEl) showPlaylists(matches);
   }
 
-  // RANDOM VIBE
+  /* -------------------------
+     RANDOM VIBE BUTTON
+     ------------------------- */
+  const randomBtnEl = document.getElementById('randomVibeBtn');
+  const timeOptions = ['morning', 'afternoon', 'evening', 'night', 'weekend'];
+  const energyOptions = ['low', 'medium', 'hype', 'high'];
+  const moodOptions = ['happy', 'sad', 'chill', 'heartbreak', 'workout', 'afro', 'pop', 'hip-hop'];
+
   if (randomBtnEl) {
     randomBtnEl.addEventListener('click', async (e) => {
       e.preventDefault();
@@ -428,14 +598,21 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isBrowsePage) setMoodBackground(mapped);
 
       const query = `${randomMoodRaw} ${randomTime} ${randomEnergy}`;
-      if (playlistContainerEl)
-        playlistContainerEl.innerHTML = `<p>🎲 Feeling ${escapeHtml(randomMoodRaw)}? Let’s find your vibe...</p>`;
+      
+      if (playlistContainerEl) {
+        playlistContainerEl.innerHTML = `<p style="text-align:center;font-size:18px;">🎲 Feeling ${escapeHtml(randomMoodRaw)}? Let's find your vibe...</p>`;
+      }
+      
       const found = await fetchSpotifyPlaylist(query, 8);
       await handlePlaylistDisplay(found);
     });
   }
 
-  // BUILD MY VIBE
+  /* -------------------------
+     BUILD MY VIBE BUTTON
+     ------------------------- */
+  const buildBtnEl = document.getElementById('buildVibeBtn');
+
   if (buildBtnEl) {
     buildBtnEl.addEventListener('click', async (e) => {
       e.preventDefault();
@@ -449,8 +626,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isBrowsePage) setMoodBackground(normalized);
 
       const query = [moodRaw, time, energy].filter(Boolean).join(' ') || 'vibe mix';
-      if (playlistContainerEl)
-        playlistContainerEl.innerHTML = `<p>🎧 Building your vibe for "${escapeHtml(query)}"...</p>`;
+      
+      if (playlistContainerEl) {
+        playlistContainerEl.innerHTML = `<p style="text-align:center;font-size:18px;">🎧 Building your vibe for "${escapeHtml(query)}"...</p>`;
+      }
+      
       const found = await fetchSpotifyPlaylist(query, 8);
       await handlePlaylistDisplay(found);
     });
@@ -462,7 +642,15 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.mood-button').forEach(button => {
     button.addEventListener('click', () => {
       const mood = button.getAttribute('data-mood');
-      localStorage.setItem('selectedMood', mood);
+      appState.selectedMood = mood;
+      
+      // Try to persist to localStorage if available
+      try {
+        localStorage.setItem('selectedMood', mood);
+      } catch (e) {
+        console.log('localStorage not available, using session state');
+      }
+      
       window.location.href = 'PickAPlatform.html';
     });
   });

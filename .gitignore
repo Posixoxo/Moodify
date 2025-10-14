@@ -19,3 +19,6 @@ build/
 Thumbs.db
 Assets/
 Assets/
+
+# Local Netlify folder
+.netlify
